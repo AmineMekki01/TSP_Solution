@@ -12,7 +12,6 @@ def prepare_data(file_path):
         lines = f.readlines()[1:]
     nodes = {}
     for idx, line in enumerate(lines):
-        print(idx, line)
         x, y = line.strip().split(' ')
         nodes[idx] = (float(x), float(y))
     coords = np.array(list(nodes.values()))

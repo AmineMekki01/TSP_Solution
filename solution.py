@@ -4,34 +4,33 @@ from src.algorithms.SA import simulated_annealing
 from src.algorithms.brute_force import brute_force
 from src.utils.helpers import prepare_data
 import os
-
-def main(method):
-    if len(sys.argv) != 4:
-        print("Usage: python script.py <instance_file> <cutoff> <rand_seed>")
+import random 
+def main():
+    if len(sys.argv) != 5:
+        print("Usage: python script.py <instance_file> <algorithm_type> <cutoff> <rand_seed>")
         sys.exit(1)
     
-    instance_file, cutoff_time, rand_seed = sys.argv[1:4]
+    instance_file, algorithm_type, cutoff_time, rand_seed  = sys.argv[1:5]
     cutoff_time, rand_seed = float(cutoff_time), int(rand_seed)
-    print(os.getcwd())
     dist_matrix, num_locs = prepare_data("instances/" + instance_file)
     
-    if method == "heuristic":
-        result = heuristic(rand_seed, dist_matrix, num_locs, cutoff_time)   
-        print(result) 
-        print(f"Best distance: {result[0]}")
-        print(f"Best path: {result[1:-1]}")
+    if algorithm_type == "greedy":
+        result = heuristic(rand_seed, dist_matrix, num_locs, cutoff_time)  
+        solution_path = "solutions/greedy/" 
     
-    elif method == "SA":
-        result = simulated_annealing(rand_seed, dist_matrix, cutoff_time)
-     
-    elif method == "brute_force":
+    elif algorithm_type == "SA":
+        result = simulated_annealing(rand_seed, dist_matrix, cutoff_time, 1000, 0.01)
+        solution_path = "solutions/SA/"
+        
+    elif algorithm_type == "brute_force":
         result = brute_force(dist_matrix)
+        solution_path = "solutions/brute_force/"
       
         
     instance_name = instance_file.split('.')[0]
-    solution_file = f"solutions/{instance_name}_{method}_{cutoff_time}_{rand_seed}.sol"
-    trace_file = f"solutions/{instance_name}_{method}_{cutoff_time}_{rand_seed}.trace"
-    path_only_file = f"solutions/{instance_name}_{method}_{cutoff_time}_{rand_seed}_path_only.txt"
+    solution_file = f"{solution_path}/{instance_name}_{algorithm_type}_{cutoff_time}_{rand_seed}.sol"
+    trace_file = f"{solution_path}/{instance_name}_{algorithm_type}_{cutoff_time}_{rand_seed}.trace"
+    path_only_file = f"{solution_path}/{instance_name}_{algorithm_type}_{cutoff_time}_{rand_seed}_path_only.txt"
     
     with open(solution_file, 'w') as handle:
         handle.write(f"{result[0]}\n")
@@ -45,8 +44,6 @@ def main(method):
 
     
 if __name__ == '__main__':
-    # main("heuristic")
-    main("SA")
-    # main("brute_force")
-    
+    main()
+   
 
