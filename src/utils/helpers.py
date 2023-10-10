@@ -1,5 +1,4 @@
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 from scipy.spatial.distance import squareform, pdist
 
@@ -9,28 +8,25 @@ def set_diag_to_inf(matrix):
 
 
 def prepare_data(file_path):
+    with open(file_path, 'r') as f:
+        lines = f.readlines()[1:]
+    nodes = {}
+    for idx, line in enumerate(lines):
+        print(idx, line)
+        x, y = line.strip().split(' ')
+        nodes[idx] = (float(x), float(y))
+    coords = np.array(list(nodes.values()))
+    dist_matrix = np.sqrt(((coords[:, np.newaxis, :] - coords)**2).sum(axis=2))
+    np.fill_diagonal(dist_matrix, np.inf)
+    return dist_matrix, len(coords)
 
-    df = pd.read_csv(f"instances/{file_path}", sep=' ', names=['X', 'Y'], skiprows=1, skipfooter=1, engine='python')
-    df.index += 1  
     
-    dist_matrix = pd.DataFrame(
-        squareform(pdist(df)), 
-        columns=df.index,
-        index=df.index
-    )
-    
-    set_diag_to_inf(dist_matrix)
-    return dist_matrix, len(df)
-
-
 
 
 def read_path_from_file(file_path):
     with open(file_path, 'r') as f:
         nodes = list(map(int, f.read().strip().split()))
     return nodes
-
-
 
 def plot_graph(df, nodes):
     plt.scatter(df['X'], df['Y'], c='blue')

@@ -3,29 +3,32 @@ import random
 import numpy as np
 
 def heuristic(rand_seed, dist_matrix, num_locs, cutoff):
-
-    unvisited = set(range(1, num_locs + 1))  
+    unvisited = set(range(num_locs))
     total_distance = 0
     path = []
     start_time = time()
     
     random.seed(rand_seed)
-    start = random.randrange(1, num_locs + 1)
+    start = random.randrange(num_locs)
     temp = start
-    
+
     while unvisited and (time() - start_time < cutoff):
         unvisited.remove(temp)
-        row = dist_matrix.loc[temp]
-        sort_index = [i + 1 for i in np.argsort(row)]
+        row = dist_matrix[temp, :]
         
-        min_index = next((i for i in sort_index if i in unvisited), None)
-        if min_index is not None:
-            dist = dist_matrix.at[temp, min_index]
-            path.append([temp, min_index, int(dist)])
+        min_index = -1
+        min_value = np.inf
+        for idx in unvisited:
+            if row[idx] < min_value:
+                min_value = row[idx]
+                min_index = idx
+
+        if min_index != -1:
+            path.append([temp, min_index, int(min_value)])
+            total_distance += min_value
             temp = min_index
-            total_distance += dist
         else:
-            back_distance = dist_matrix.at[temp, start]
+            back_distance = dist_matrix[temp, start]
             total_distance += back_distance
             path.append([temp, start, int(back_distance)])
             return [int(total_distance)] + path + [round(time() - start_time, 2)]

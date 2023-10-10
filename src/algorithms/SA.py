@@ -1,38 +1,46 @@
 import random
-import math
+import numpy as np
+from time import time 
+def simulated_annealing(rand_seed, dist_matrix, cutoff):
+    num_locs = dist_matrix.shape[0]
+    unvisited = set(range(num_locs))
+    total_distance = 0
+    path = []
+    start_time = time()
+    
+    random.seed(rand_seed)
+    start = random.randrange(num_locs)
+    temp = start
 
-def simulated_annealing(dist_matrix, num_locs, initial_temp, cooling_rate):
-    current_path = list(range(1, num_locs + 1))  
-    random.shuffle(current_path)
-    current_distance = path_distance(current_path, dist_matrix)
-    
-    best_path = current_path[:]
-    best_distance = current_distance
-    
-    temp = initial_temp
-    
-    while temp > 1:
-        new_path = current_path[:]
-        i, j = random.sample(range(num_locs), 2)
-        new_path[i], new_path[j] = new_path[j], new_path[i]
+    while unvisited and (time() - start_time < cutoff):
+        unvisited.remove(temp)
+        row = dist_matrix[temp, :]
         
-        new_distance = path_distance(new_path, dist_matrix)
-        
-        if new_distance < current_distance or math.exp((current_distance - new_distance) / temp) > random.random():
-            current_path = new_path
-            current_distance = new_distance
-            
-            if new_distance < best_distance:
-                best_path = new_path[:]
-                best_distance = new_distance
-                
-        temp *= cooling_rate
-    
-    return best_distance, best_path
+        min_index = -1
+        min_value = np.inf
+        for idx in unvisited:
+            if row[idx] < min_value:
+                min_value = row[idx]
+                min_index = idx
+
+        if min_index != -1:
+            path.append([temp, min_index, int(min_value)])
+            total_distance += min_value
+            temp = min_index
+        else:
+            back_distance = dist_matrix[temp, start]
+            total_distance += back_distance
+            path.append([temp, start, int(back_distance)])
+            elapsed_time = round(time() - start_time, 2)
+            return [int(total_distance)] + path + [elapsed_time]
+
+    return [int(total_distance)] + path + [round(time() - start_time, 2)]
+
+
 
 def path_distance(path, dist_matrix):
     distance = 0
     for i in range(len(path) - 1):
-        distance += dist_matrix.at[path[i], path[i + 1]]
-    distance += dist_matrix.at[path[-1], path[0]]
+        distance += dist_matrix[path[i] - 1, path[i + 1] - 1]
+    distance += dist_matrix[path[-1] - 1, path[0] - 1]
     return distance
