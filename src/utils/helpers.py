@@ -14,18 +14,13 @@ def prepare_data(file_path):
     for idx, line in enumerate(lines):
         x, y = line.strip().split(' ')
         nodes[idx] = (float(x), float(y))
-    coords = np.array(list(nodes.values()))
+    coords = np.array(tuple(nodes.values()))
+
     dist_matrix = np.sqrt(((coords[:, np.newaxis, :] - coords)**2).sum(axis=2))
     np.fill_diagonal(dist_matrix, np.inf)
     return dist_matrix, len(coords)
 
-    
 
-
-def read_path_from_file(file_path):
-    with open(file_path, 'r') as f:
-        nodes = list(map(int, f.read().strip().split()))
-    return nodes
 
 def plot_graph(df, nodes):
     plt.scatter(df['X'], df['Y'], c='blue')
