@@ -1,0 +1,2 @@
+Best Distance: 281015.08116873534
+Best Distance: 280423.96720379946
