@@ -14,6 +14,15 @@ def swap_cities(tour, i, j):
     return new_tour
 
 
+def adaptive_cooling(T, alpha, no_improve_time, max_no_improve_time):
+
+    if no_improve_time > max_no_improve_time:
+
+        return T * 1.5, 0
+    else:
+        return T * alpha, no_improve_time + 1
+
+
 def simulated_annealing(dist_matrix, num_cities, time_limit, solution_path, instance_name, rand_seed):
 
     solution_path = f"{solution_path}/{instance_name}_SA_{time_limit}_{rand_seed}"
@@ -26,6 +35,8 @@ def simulated_annealing(dist_matrix, num_cities, time_limit, solution_path, inst
     T_min = 0.00001
     alpha = 0.99
     start_time = time.time()
+    no_improve_time = 0
+    max_no_improve_time = 100
 
     while time.time() - start_time < time_limit:
         i, j = np.random.randint(0, num_cities, size=2)
@@ -40,8 +51,9 @@ def simulated_annealing(dist_matrix, num_cities, time_limit, solution_path, inst
             if new_distance < best_distance:
                 best_tour = new_tour
                 best_distance = new_distance
+                no_improve_time = 0
 
-                with open(solution_path+"all_solutions.txt", 'a') as f:
+                with open(solution_path+"_all_solutions.txt", 'a') as f:
                     f.write(f"Best Distance: {best_distance}\n")
 
                 with open(solution_path+".txt", 'w') as f:
@@ -49,6 +61,10 @@ def simulated_annealing(dist_matrix, num_cities, time_limit, solution_path, inst
                     f.write("Best Path: " +
                             ' -> '.join(map(str, best_tour)) + '\n\n')
 
-        T *= alpha
+            else:
+                no_improve_time += 1
+
+        T, no_improve_time = adaptive_cooling(
+            T, alpha, no_improve_time, max_no_improve_time)
 
     return best_tour, best_distance

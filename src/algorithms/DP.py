@@ -1,3 +1,5 @@
+import time
+
 
 class TspDynamicProgrammingRecursive:
     def __init__(self, distance, instance_name, time_limit, rand_seed, solution_path):
@@ -22,10 +24,15 @@ class TspDynamicProgrammingRecursive:
             return None, None
 
         if not self.ranSolver:
+            start_time = time.time()  #
             self.solve()
+            end_time = time.time()
 
         self.save_solution(self.instance_name,
                            self.time_limit, self.rand_seed, self.solution_path)
+
+        execution_time = end_time - start_time
+        print(f"Execution Time: {execution_time} seconds")
 
         return self.minTourCost, self.tour
 

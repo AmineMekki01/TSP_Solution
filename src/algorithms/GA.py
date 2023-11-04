@@ -89,7 +89,7 @@ class TravelingSalesmanGA:
     def save_solution(self, instance_name, time_limit, rand_seed, solution_path):
 
         solution_path = f"{solution_path}/{instance_name}_DP_{time_limit}_{rand_seed}"
-        with open(solution_path+"all_solutions.txt", 'a') as f:
+        with open(solution_path+"_all_solutions.txt", 'a') as f:
             f.write(f"Best Distance: {self.best_cost}\n")
 
         with open(solution_path+".txt", 'w') as f:

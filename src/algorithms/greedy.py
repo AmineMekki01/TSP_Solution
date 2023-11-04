@@ -40,7 +40,7 @@ def greedy_tsp(rand_seed, dist_matrix, num_locs, cutoff, output_file, instance_n
             best_path = current_path
             print(best_total_distance)
 
-            with open(output_file+"all_solutions.txt", 'a') as f:
+            with open(output_file+"_all_solutions.txt", 'a') as f:
                 f.write(f"Best Distance: {best_total_distance}\n")
 
             with open(output_file+".txt", 'w') as f:

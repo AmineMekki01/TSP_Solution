@@ -61,7 +61,7 @@ def ant_colony_optimization(dist_matrix, instance_name, time_limit, rand_seed, s
                     best_cost = cost
                     best_path = path
 
-                    with open(solution_path+"all_solutions.txt", 'a') as f:
+                    with open(solution_path+"_all_solutions.txt", 'a') as f:
                         f.write(f"Best Distance: {best_cost}\n")
 
                     with open(solution_path+".txt", 'w') as f:
