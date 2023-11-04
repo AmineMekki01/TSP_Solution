@@ -1,6 +1,11 @@
 # TSP_Solution
 Solution of the traveling salesman problem using many algorithms.
 
+## Group : VIRTUOSOS
+- Amine MEKKi
+- Ahmed SIDKI 
+- Kaiyuan GONG
+
 ## Best solution : Greedy algorithm
 python solution.py Pb5.txt greedy 60 42 
 
