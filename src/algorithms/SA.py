@@ -1,88 +1,54 @@
-from time import time
+import time
 import random
 import numpy as np
-import math 
+import math
 
 
-from time import time
-import random
-import numpy as np
-import math 
-
-def two_opt(path, dist_matrix):
-    improved = True
-    while improved:
-        improved = False
-        for i in range(len(path) - 2):
-            for j in range(i + 2, len(path)):
-                if j - i == 1:
-                    continue  
-                if dist_matrix[path[i][0], path[i + 1][0]] + dist_matrix[path[j][0], path[j - 1][0]] > \
-                   dist_matrix[path[i][0], path[j][0]] + dist_matrix[path[i + 1][0], path[j - 1][0]]:
-                    path[i + 1:j] = path[i + 1:j][::-1]
-                    improved = True
-    return path
-
-def simulated_annealing(rand_seed, dist_matrix, cutoff, initial_temp, cooling_rate,
-                         max_iterations, max_temperature, local_search=False):
-    num_locs = dist_matrix.shape[0]
-    unvisited = set(range(num_locs))
-    total_distance = 0
-    path = []
-    start_time = time()
-
-    random.seed(rand_seed)
-    start = random.randrange(num_locs)
-    temp = start
-
-    current_temp = initial_temp  
-    iterations = 0
-
-    while unvisited and (time() - start_time < cutoff) and (iterations < max_iterations) and (current_temp > max_temperature):
-        unvisited.remove(temp)
-        row = dist_matrix[temp, :]
-
-        min_index = -1
-        min_value = np.inf
-        for idx in unvisited:
-            if row[idx] < min_value:
-                min_value = row[idx]
-                min_index = idx
-
-        if min_index != -1:
-            path.append([temp, min_index, int(min_value)])
-            total_distance += min_value
-            temp = min_index
-        else:
-            back_distance = dist_matrix[temp, start]
-            total_distance += back_distance
-            path.append([temp, start, int(back_distance)])
-            
-            current_temp *= cooling_rate
-            
-            if current_temp <= 1e-3:
-                elapsed_time = round(time() - start_time, 2)
-                return [int(total_distance)] + path + [elapsed_time]
-
-            acceptance_prob = math.exp(-back_distance / current_temp)
-
-            if random.random() > acceptance_prob:
-                temp = start
-            
-            iterations += 1
-
-    if local_search:
-        path = two_opt(path, dist_matrix)
-
-    elapsed_time = round(time() - start_time, 2)
-    return [int(total_distance)] + path + [elapsed_time]
+def total_distance(tour, dist_matrix):
+    return sum(dist_matrix[tour[i - 1], tour[i]] for i in range(len(tour)))
 
 
+def swap_cities(tour, i, j):
+    new_tour = tour[:]
+    new_tour[i], new_tour[j] = new_tour[j], new_tour[i]
+    return new_tour
 
 
-def path_distance(path, dist_matrix):
-    distance = 0
-    for i in range(len(path) - 1):
-        distance += dist_matrix[path[i] - 1, path[i + 1] - 1]
-    distance += dist_matrix[path[-1] - 1, path[0] - 1]
-    return distance
+def simulated_annealing(dist_matrix, num_cities, time_limit, solution_path, instance_name, rand_seed):
+
+    solution_path = f"{solution_path}/{instance_name}_SA_{time_limit}_{rand_seed}"
+
+    current_tour = list(np.random.permutation(num_cities))
+    current_distance = total_distance(current_tour, dist_matrix)
+    best_tour = current_tour[:]
+    best_distance = current_distance
+    T = 1.0
+    T_min = 0.00001
+    alpha = 0.99
+    start_time = time.time()
+
+    while time.time() - start_time < time_limit:
+        i, j = np.random.randint(0, num_cities, size=2)
+        new_tour = swap_cities(current_tour, i, j)
+        new_distance = total_distance(new_tour, dist_matrix)
+        delta_distance = new_distance - current_distance
+
+        if delta_distance < 0 or np.random.rand() < np.exp(-delta_distance / T):
+            current_tour = new_tour
+            current_distance = new_distance
+
+            if new_distance < best_distance:
+                best_tour = new_tour
+                best_distance = new_distance
+
+                with open(solution_path+"all_solutions.txt", 'a') as f:
+                    f.write(f"Best Distance: {best_distance}\n")
+
+                with open(solution_path+".txt", 'w') as f:
+                    f.write(f"Best Distance: {best_distance}\n")
+                    f.write("Best Path: " +
+                            ' -> '.join(map(str, best_tour)) + '\n\n')
+
+        T *= alpha
+
+    return best_tour, best_distance

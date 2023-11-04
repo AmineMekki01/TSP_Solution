@@ -1,6 +1,7 @@
 
 class TspDynamicProgrammingRecursive:
-    def __init__(self, distance):
+    def __init__(self, distance, instance_name, time_limit, rand_seed, solution_path):
+
         self.N = len(distance)
         self.START_NODE = 0
         self.FINISHED_STATE = (1 << self.N) - 1
@@ -8,17 +9,25 @@ class TspDynamicProgrammingRecursive:
         self.minTourCost = float('inf')
         self.tour = []
         self.ranSolver = False
-        self.memo = {}  
+        self.memo = {}
+        self.instance_name = instance_name
+        self.time_limit = time_limit
+        self.rand_seed = rand_seed
+        self.solution_path = solution_path
 
-    def get_tour(self):
+    def get_metrics(self):
+
+        if len(self.distance) > 15:
+            print("Number of cities is too large! A solution will not be found in a reasonable amount of time. Choose a smaller number of cities <= 15.")
+            return None, None
+
         if not self.ranSolver:
             self.solve()
-        return self.tour
 
-    def get_tour_cost(self):
-        if not self.ranSolver:
-            self.solve()
-        return self.minTourCost
+        self.save_solution(self.instance_name,
+                           self.time_limit, self.rand_seed, self.solution_path)
+
+        return self.minTourCost, self.tour
 
     def solve(self):
         state = 1 << self.START_NODE
@@ -49,7 +58,8 @@ class TspDynamicProgrammingRecursive:
             if (state & (1 << next_node)) != 0:
                 continue
             next_state = state | (1 << next_node)
-            new_cost = self.distance[i][next_node] + self.tsp(next_node, next_state)
+            new_cost = self.distance[i][next_node] + \
+                self.tsp(next_node, next_state)
             if new_cost < min_cost:
                 min_cost = new_cost
                 index = next_node
@@ -69,5 +79,8 @@ class TspDynamicProgrammingRecursive:
                 index = next_node
         return index
 
-
-    
+    def save_solution(self, instance_name, time_limit, rand_seed, solution_path):
+        solution_path = f"{solution_path}/{instance_name}_DP_{time_limit}_{rand_seed}"
+        with open(solution_path+".txt", 'w') as f:
+            f.write(f"Best Distance: {self.minTourCost}\n")
+            f.write("Best Path: " + ' -> '.join(map(str, self.tour)) + '\n\n')
